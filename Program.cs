@@ -7,7 +7,7 @@ class Program
     {
         Console.WriteLine("Welcome to the iCar System");
         Renter renter = new Renter("DL123", Renter.RenterType.Prime, 1, "John Doe", 1234567890, new DateTime(1980, 1, 1), "123 Main St");
-        CarOwner carOwner = new CarOwner { Id = 1, Name = "John Doe" };
+        CarOwner carOwner = new CarOwner(1, "John Doe");
 
         string currentUserType = "Car Owner"; // Default to Car Owner view
 
@@ -22,17 +22,18 @@ class Program
             {
                 Console.WriteLine("3. Register a Vehicle");
                 Console.WriteLine("4. Display Registered Vehicles");
+                Console.WriteLine("5. Manage Booking"); // Added Manage Booking option
             }
             else if (currentUserType == "Renter")
             {
                 Console.WriteLine("3. Damage Report");
             }
 
-            Console.WriteLine("5. Exit");
+            Console.WriteLine("6. Exit");
             Console.Write("Choose an option: ");
 
             int option;
-            while (!int.TryParse(Console.ReadLine(), out option) || option < 1 || option > 5 ||
+            while (!int.TryParse(Console.ReadLine(), out option) || option < 1 || option > 6 ||
                    (currentUserType == "Renter" && option == 4) ||
                    (currentUserType == "Car Owner" && option == 3 && currentUserType != "Car Owner"))
             {
@@ -65,6 +66,12 @@ class Program
                     }
                     break;
                 case 5:
+                    if (currentUserType == "Car Owner")
+                    {
+                        ModifyRentalRateAndSetSchedules(carOwner); 
+                    }
+                    break;
+                case 6:
                     Console.WriteLine("Exiting the system. Goodbye!");
                     return;
             }
@@ -186,7 +193,7 @@ class Program
             damageReport.DisplayReport();
 
             // Display Schedule the inspection for the car
-            car.ScheduleInspection(carId);
+            car.ScheduleInspection();
 
             // display insurance coverage
             if (carInsurance != null)
@@ -568,5 +575,81 @@ class Program
         }
     }
     // tzi end
+
+    // Garence Start
+    static void ModifyRentalRateAndSetSchedules(CarOwner carOwner)
+    {
+        Console.WriteLine("Modify Rental Rate and Set Availability Schedules");
+
+        if (carOwner.RegisteredCars.Count == 0)
+        {
+            Console.WriteLine("No cars registered. Please register a vehicle first.");
+            return;
+        }
+
+        carOwner.DisplayRegisteredCars();
+        int carId = PromptForInt("Select the Car ID to modify: ");
+        Car selectedCar = Car.GetCarById(carId, carOwner.RegisteredCars);
+
+        if (selectedCar == null)
+        {
+            Console.WriteLine("Invalid Car ID. Please try again.");
+            return;
+        }
+
+        // Display current rental rate and availability schedule
+        Console.WriteLine("\nCurrent Rental Rate:");
+        if (selectedCar.RentalRate != null)
+        {
+            Console.WriteLine($"Current Rate: {selectedCar.RentalRate.Rate}");
+        }
+        else
+        {
+            Console.WriteLine("No rental rate set.");
+        }
+
+        Console.WriteLine("\nCurrent Availability Schedules:");
+        if (selectedCar.AvailabilitySchedule != null)
+        {
+            foreach (var timePeriod in selectedCar.AvailabilitySchedule.GetTimePeriods())
+            {
+                Console.WriteLine($"Start: {timePeriod.StartDate:yyyy-MM-dd}, End: {timePeriod.EndDate:yyyy-MM-dd}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("No availability schedule set.");
+        }
+
+        // Prompt for a new rental rate
+        double newRate = PromptForDouble("\nEnter the new rental rate: ");
+        carOwner.SetNewRate(selectedCar, newRate);
+
+        // Set new availability schedules
+        Console.WriteLine("Set Availability Schedules for the car:");
+        while (true)
+        {
+            DateTime startDate = PromptForDate("Enter the start date (yyyy-mm-dd): ");
+            DateTime endDate = PromptForDate("Enter the end date (yyyy-mm-dd): ");
+            selectedCar.SetNewSchedule(startDate, endDate);
+
+            string addMore = PromptForYesNo("Do you want to add another availability schedule? (yes/no): ");
+            if (addMore.ToLower() != "yes")
+            {
+                break;
+            }
+        }
+
+        // Final display of the updated rate and schedule
+        Console.WriteLine("\nFinal Summary for Car ID: " + selectedCar.CarId);
+        Console.WriteLine("Updated Rental Rate: " + selectedCar.RentalRate.Rate);
+
+        Console.WriteLine("Updated Availability Schedules:");
+        foreach (var timePeriod in selectedCar.AvailabilitySchedule.GetTimePeriods())
+        {
+            Console.WriteLine($"Start: {timePeriod.StartDate.ToString("yyyy-MM-dd")}, End: {timePeriod.EndDate.ToString("yyyy-MM-dd")}");
+        }
+    }
+    // Garence End
 }
 
