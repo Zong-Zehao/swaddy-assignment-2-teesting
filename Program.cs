@@ -546,7 +546,7 @@ class Program
         }
 
         Console.WriteLine("\nCurrent Availability Schedules:");
-        if (selectedCar.AvailabilitySchedule != null)
+        if (selectedCar.AvailabilitySchedule != null && selectedCar.AvailabilitySchedule.GetTimePeriods().Count > 0)
         {
             foreach (var timePeriod in selectedCar.AvailabilitySchedule.GetTimePeriods())
             {
@@ -558,9 +558,26 @@ class Program
             Console.WriteLine("No availability schedule set.");
         }
 
-        // Prompt for a new rental rate
-        double newRate = PromptForDouble("\nEnter the new rental rate: ");
-        carOwner.SetNewRate(selectedCar, newRate);
+        // Prompt for a new rental rate or option to go back
+        while (true)
+        {
+            string input = PromptForString("\nEnter the new rental rate or 'E' to Exit: ");
+            if (input.Trim().ToUpper() == "E")
+            {
+                Console.WriteLine("Returning to the previous menu.");
+                return;  // Go back to the previous menu
+            }
+
+            if (double.TryParse(input, out double newRate))
+            {
+                carOwner.SetNewRate(selectedCar, newRate);
+                break; // Exit the loop after setting the rate
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Please enter a valid rental rate or 'E' to Exit.");
+            }
+        }
 
         // Set new availability schedules
         Console.WriteLine("Set Availability Schedules for the car:");
@@ -584,10 +601,11 @@ class Program
         Console.WriteLine("Updated Availability Schedules:");
         foreach (var timePeriod in selectedCar.AvailabilitySchedule.GetTimePeriods())
         {
-            Console.WriteLine($"Start: {timePeriod.StartDate.ToString("yyyy-MM-dd")}, End: {timePeriod.EndDate.ToString("yyyy-MM-dd")}");
+            Console.WriteLine($"Start: {timePeriod.StartDate:yyyy-MM-dd}, End: {timePeriod.EndDate:yyyy-MM-dd}");
         }
     }
     // Garence End
+
 
     // Izwan start
 
