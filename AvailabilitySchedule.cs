@@ -26,7 +26,7 @@ namespace SWAD_Assignment_2
             if (IsValidDate(startDateTime, endDateTime))
             {
                 TimePeriods.Add((startDateTime, endDateTime));
-                Console.WriteLine("Time period added successfully.");
+                Console.WriteLine("Schedule added successfully.");
             }
             else
             {

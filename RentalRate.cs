@@ -9,12 +9,13 @@ namespace SWAD_Assignment_2
 {
     public class RentalRate
     {
-        public int CarId { get; private set; } // Link RentalRate to Car
+        public int CarId { get; private set; }
         public double Rate { get; private set; }
 
         public RentalRate(int carId, double rate)
         {
             CarId = carId;
+            Rate = 50;
 
             if (ValidateRate(rate))
             {
@@ -22,7 +23,7 @@ namespace SWAD_Assignment_2
             }
             else
             {
-                throw new ArgumentException("Invalid rate. Rate must be greater than 0.");
+                throw new ArgumentException("Invalid rate. Rate must be greater than $1.");
             }
         }
 
@@ -39,7 +40,7 @@ namespace SWAD_Assignment_2
             }
             else
             {
-                throw new ArgumentException("Invalid rate. Rate must be greater than 0.");
+                throw new ArgumentException("Invalid rate. Rate must be greater than $1.");
             }
         }
     }

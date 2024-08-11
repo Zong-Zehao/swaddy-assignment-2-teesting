@@ -68,7 +68,7 @@ class Program
                 case 5:
                     if (currentUserType == "Car Owner")
                     {
-                        ModifyRentalRateAndSetSchedules(carOwner); 
+                        ManageBookings(carOwner); 
                     }
                     break;
                 case 6:
@@ -380,21 +380,19 @@ class Program
         string insurance = PromptInsurance();
         string photos = PromptForPhotos();
 
-        string create = PromptForString("Would you like to add this car to your account?");
+        string create = PromptForString("Would you like to add this car to your account? (Y/N): ");
         if (create == "Y")
         {
             Car newCar = CreateNewVehicle(vehicleDetails, insurance, owner, photos);
             owner.AddNewListing(newCar);
 
+            Console.WriteLine("\nCar registered successfully! Here are the details:");
+            Console.WriteLine(newCar.ToString());
         }
         else
         {
             Console.WriteLine("Car was not added.");
         }
-
-
-
-
     }
 
     static Dictionary<string, object> PromptDetails()
@@ -436,7 +434,7 @@ class Program
     static bool VerifyDetails(string make, int year, double mileage)
     {
 
-        string[] validMakes = { "Toyota", "Honda", "Ford", "Chevrolet", "BMW" };
+        string[] validMakes = { "Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Tesla", "Lamborghini"};
 
 
         if (Array.IndexOf(validMakes, make) == -1)
@@ -495,8 +493,6 @@ class Program
 
     static Car CreateNewVehicle(Dictionary<string, object> vehicleDetails, string insurance, CarOwner owner, string photos)
     {
-
-
         int carId = owner.RegisteredCars.Count + 1;
         string make = (string)vehicleDetails["Make"];
         string model = (string)vehicleDetails["Model"];
@@ -504,10 +500,7 @@ class Program
         double mileage = (double)vehicleDetails["Mileage"];
 
         return new Car(carId, make, model, year, mileage, insurance, photos);
-
-
     }
-
 
     static int PromptForInt(string prompt)
     {
@@ -535,7 +528,6 @@ class Program
             }
         }
     }
-
 
     static string PromptForString(string message)
     {
@@ -577,9 +569,9 @@ class Program
     // tzi end
 
     // Garence Start
-    static void ModifyRentalRateAndSetSchedules(CarOwner carOwner)
+    static void ManageBookings(CarOwner carOwner)
     {
-        Console.WriteLine("Modify Rental Rate and Set Availability Schedules");
+        Console.WriteLine("Manage Bookings");
 
         if (carOwner.RegisteredCars.Count == 0)
         {

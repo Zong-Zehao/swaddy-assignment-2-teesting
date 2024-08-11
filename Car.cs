@@ -25,7 +25,7 @@ public class Car
         Insurance = insurance;
         Photos = photos;
         DamageReports = new List<DamageReport>();
-        RentalRate = null; // Initialize as null 
+        RentalRate = new RentalRate(carId, 50);
         AvailabilitySchedule = new AvailabilitySchedule(carId); // Initialize AvailabilitySchedule
     }
 
@@ -52,7 +52,7 @@ public class Car
         }
         else
         {
-            Console.WriteLine("Error: RentalRate's CarId does not match this car.");
+            Console.WriteLine("Error: Invalid");
         }
     }
 
@@ -90,7 +90,8 @@ public class Car
 
     public override string ToString()
     {
-        return $"Car ID: {CarId}, Make: {Make}, Model: {Model}, Year: {Year}, Mileage: {Mileage}, Insurance: {Insurance}, Photos: {Photos}";
+        string rentalRateDisplay = RentalRate != null ? $"Rental Rate: ${RentalRate.Rate}" : "Rental Rate: Not Set";
+        return $"Car ID: {CarId}, Make: {Make}, Model: {Model}, Year: {Year}, Mileage: {Mileage}, Insurance: {Insurance}, Photos: {Photos}, {rentalRateDisplay}";
     }
 }
 
