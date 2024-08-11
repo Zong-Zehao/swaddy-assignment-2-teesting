@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Globalization;
+using System.Xml.Linq;
 
 class Program
 {
@@ -618,7 +619,7 @@ class Program
         // Show available cars before booking
         carOwner.DisplayRegisteredCars();
 
-        // Prompt for and select a car
+        //// Prompt for and select a car
         int carId = PromptForInt("Select the Car ID to book: ");
         selectedCar = Car.GetCarById(carId, carOwner.RegisteredCars);
 
@@ -732,7 +733,7 @@ class Program
             Console.WriteLine($"\nExisting bookings for Car ID {selectedCar.CarId}:");
             foreach (var booking in bookings)
             {
-                Console.WriteLine($"Booking ID: {booking.BookingId}, Start: {booking.StartDateTime}, End: {booking.EndDateTime}");
+                Console.WriteLine($"Booking ID: {booking.BookingId}, Start: {booking.StartDateTime:yyyy-MM-dd}, End: {booking.EndDateTime:yyyy-MM-dd}");
             }
         }
     }
