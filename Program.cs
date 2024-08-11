@@ -213,12 +213,15 @@ class Program
             }
 
             // display message depending on the amount of remaining balance
+            // display message depending on the amount of remaining balance
             if (remainingBalance > 0)
             {
                 Console.WriteLine($"\nThis is the Remaining Balance: ${remainingBalance}");
                 Console.WriteLine("Please proceed with the payment.");
-                // Proceed with payment
-                ProcessPayment();
+
+                // Create an instance of Payment class and call ProcessPayment method
+                Payment payment = new Payment();
+                payment.ProcessPayment();
             }
             else
             {
@@ -264,72 +267,7 @@ class Program
             totalCost += 50000 * destroyedParts.Length; // Cost per destroyed part
         }
         return totalCost;
-    }
-
-    // only called if there is remaining balance to be paid
-    static void ProcessPayment()
-    {
-        string fullName = PromptForString("\nEnter your full name: ");
-        string cardNumber = PromptForCardNumber("Enter your card number: ");
-        string expirationDate = PromptForExpirationDate("Enter your card's expiration date (mm/yy): ");
-        string cvc = PromptForCvc("Enter your card's CVC (3 digits): ");
-
-        Console.WriteLine("\nPayment successful. Thank you!");
-    }
-
-    static string PromptForCardNumber(string message)
-    {
-        string cardNumber;
-        while (true)
-        {
-            cardNumber = PromptForString(message);
-            if (cardNumber.Length == 16 && long.TryParse(cardNumber, out _))
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid card number. Please enter a valid 16-digit card number.");
-            }
-        }
-        return cardNumber;
-    }
-
-    static string PromptForExpirationDate(string message)
-    {
-        string expirationDate;
-        while (true)
-        {
-            expirationDate = PromptForString(message);
-            if (DateTime.TryParseExact(expirationDate, "MM/yy", null, DateTimeStyles.None, out _))
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid expiration date. Please enter in MM/yy format.");
-            }
-        }
-        return expirationDate;
-    }
-
-    static string PromptForCvc(string message)
-    {
-        string cvc;
-        while (true)
-        {
-            cvc = PromptForString(message);
-            if (cvc.Length == 3 && int.TryParse(cvc, out _))
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid CVC. Please enter a 3-digit number.");
-            }
-        }
-        return cvc;
-    }
+    }    
 
     static string PromptForYesNo(string prompt)
     {
