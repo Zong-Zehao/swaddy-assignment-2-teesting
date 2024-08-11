@@ -14,6 +14,9 @@ public class Car
     public List<DamageReport> DamageReports { get; set; }
     public RentalRate RentalRate { get; set; }
     public AvailabilitySchedule AvailabilitySchedule { get; set; }
+    public ICarStation iCarStation { get; set; }
+    public List<Booking> bookings;
+
 
     public Car(int carId, string make, string model, int year, double mileage, string insurance, string photos)
     {
@@ -27,6 +30,8 @@ public class Car
         DamageReports = new List<DamageReport>();
         RentalRate = new RentalRate(carId, 50);
         AvailabilitySchedule = new AvailabilitySchedule(carId); // Initialize AvailabilitySchedule
+        iCarStation = new ICarStation(1, "iCar Jurong", "Jurong Street 5", 1234567890);
+        bookings = new List<Booking>(); // Initialize bookings list
     }
 
     // Method to retrieve a car by its ID from a list 
@@ -86,6 +91,23 @@ public class Car
     public AvailabilitySchedule GetAvailabilitySchedule()
     {
         return AvailabilitySchedule;
+    }
+
+    public void AddBooking(Booking booking)
+    {
+        if (booking == null)
+        {
+            Console.WriteLine("Error: Booking cannot be null.");
+            return;
+        }
+
+        // Add the booking to the bookings list
+        bookings.Add(booking);
+    }
+
+    public List<Booking> getBookings()
+    {
+        return bookings;
     }
 
     public override string ToString()

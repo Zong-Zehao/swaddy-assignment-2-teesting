@@ -3,6 +3,7 @@
     private string driversLicenseNo;
     private RenterType renterType;
     private List<DamageReport> drList;
+    public List<Booking> BookList { get; set; } = new List<Booking>();
 
     public Renter(string driversLicenseNo, RenterType renterType, int userId, string name, int contact, DateTime dob, string address)
         : base(userId, name, contact, dob, address)
@@ -10,6 +11,7 @@
         this.driversLicenseNo = driversLicenseNo;
         this.renterType = renterType;
         this.drList = new List<DamageReport>();
+        this.BookList = new List<Booking>();
     }
 
     public string DriversLicenseNo

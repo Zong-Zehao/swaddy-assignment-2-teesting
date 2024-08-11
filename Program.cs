@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Metrics;
+﻿using SWAD_Assignment_2;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 
 class Program
@@ -26,7 +28,8 @@ class Program
             }
             else if (currentUserType == "Renter")
             {
-                Console.WriteLine("3. Damage Report");
+                Console.WriteLine("3. Book Car");
+                Console.WriteLine("4. Damage Report");
             }
 
             Console.WriteLine("6. Exit");
@@ -56,13 +59,17 @@ class Program
                     }
                     else if (currentUserType == "Renter")
                     {
-                        SubmitDamageReport(renter, carOwner);
+                        BookCar(renter,carOwner);
                     }
                     break;
                 case 4:
                     if (currentUserType == "Car Owner")
                     {
                         carOwner.DisplayRegisteredCars();
+                    }
+                    else if (currentUserType == "Renter")
+                    {
+                        SubmitDamageReport(renter, carOwner);
                     }
                     break;
                 case 5:
@@ -581,5 +588,238 @@ class Program
         }
     }
     // Garence End
+
+    // Izwan start
+
+    public static Car selectedCar; // Store the selected car
+    public static Renter renter;
+    public static CarOwner carOwner;
+
+    static void BookCar(Renter renter, CarOwner carOwner)
+    {
+        // Show available cars before booking
+        carOwner.DisplayRegisteredCars();
+
+        // Prompt for and select a car
+        int carId = PromptForInt("Select the Car ID to book: ");
+        selectedCar = Car.GetCarById(carId, carOwner.RegisteredCars);
+
+        if (selectedCar == null)
+        {
+            Console.WriteLine("Invalid Car ID. Please try again.");
+            return;
+        }
+
+        // Show availability schedule for the selected car
+        displayTimePeriods();
+
+        // Show existing bookings for the selected car
+        displayCarBookings();
+
+        // Prompt for booking details and get the entered details
+        promptStartDateTime();
+        DateTime startDateTime = enterStartDateTime();
+
+        promptEndDateTime();
+        DateTime endDateTime = enterEndDateTime();
+
+        promptPickupOption();
+        string pickupOption = enterPickupOption();
+
+        if (isValidBooking(selectedCar, startDateTime, endDateTime, pickupOption))
+        {
+            double rentalRate = selectedCar.GetRentalRate()?.Rate ?? 0;
+            double totalCost = calculateTotalCost(startDateTime, endDateTime, rentalRate);
+            totalCost = additionalCost(totalCost, pickupOption); // Add delivery cost if applicable
+
+            // Create the booking
+            Booking booking = createBooking(startDateTime, endDateTime, pickupOption, totalCost);
+
+            // Add booking to car and renter
+            addBooking(booking);
+
+            // Display booking details
+            Console.WriteLine("\nYour booking is confirmed!");
+            Console.WriteLine($"Renter: {booking.Renter?.Name}\nCar ID: {booking.Car?.CarId}\n{booking.StartDateTime:yyyy-MM-dd} - {booking.EndDateTime:yyyy-MM-dd}" +
+                              $"\nPickup Option: {booking.PickupOption}\nTotal Cost: ${booking.TotalCost}");
+
+            // Display pickup or delivery address
+            if (pickupOption.ToLower() == "delivery")
+            {
+                Console.WriteLine($"Delivery Address: {renter.Address}");
+            }
+            else
+            {
+                Console.WriteLine($"Pickup Location: {selectedCar.iCarStation.name}");
+            }
+        }
+    }
+
+    static void displayCars()
+    {
+        Console.WriteLine("\nAvailable Cars:");
+        foreach (var car in carOwner.RegisteredCars)
+        {
+            var rentalRate = car.GetRentalRate();
+            Console.WriteLine($"Car ID: {car.CarId}, Make: {car.Make}, Model: {car.Model}, Year: {car.Year}, Rate: ${rentalRate?.Rate ?? 0}/day");
+        }
+    }
+
+    static void getCarDetails()
+    {
+        foreach (var car in carOwner.RegisteredCars)
+        {
+            var rentalRate = car.GetRentalRate();
+            Console.WriteLine($"Car ID: {car.CarId}, Make: {car.Make}, Model: {car.Model}, Year: {car.Year}, Rate: ${rentalRate?.Rate ?? 0}/day");
+        }
+    }
+
+    static void selectCar()
+    {
+        int carId = PromptForInt("Select the Car ID to book: ");
+        Car selectedCar = Car.GetCarById(carId, carOwner.RegisteredCars);
+
+        if (selectedCar == null)
+        {
+            Console.WriteLine("Invalid Car ID. Please try again.");
+            return;
+        }
+    }
+
+    static bool findCar(int carId)
+    {
+        Car selectedCar = Car.GetCarById(carId, carOwner.RegisteredCars);
+        return selectedCar != null;
+    }
+
+    static void displayTimePeriods()
+    {
+        var availabilitySchedule = selectedCar.GetAvailabilitySchedule();
+        Console.WriteLine($"\nAvailability Schedule for Car ID {selectedCar.CarId}:");
+        foreach (var period in availabilitySchedule.GetTimePeriods())
+        {
+            Console.WriteLine($"From: {period.StartDate} To: {period.EndDate}");
+        }
+    }
+
+    static void displayCarBookings()
+    {
+        var bookings = selectedCar.getBookings();
+        if (bookings.Count == 0)
+        {
+            Console.WriteLine($"\nNo existing bookings for Car ID {selectedCar.CarId}.");
+        }
+        else
+        {
+            Console.WriteLine($"\nExisting bookings for Car ID {selectedCar.CarId}:");
+            foreach (var booking in bookings)
+            {
+                Console.WriteLine($"Booking ID: {booking.BookingId}, Start: {booking.StartDateTime}, End: {booking.EndDateTime}");
+            }
+        }
+    }
+
+    // Prompt methods
+    static void promptStartDateTime()
+    {
+        Console.Write("\nEnter start date and time (yyyy-MM-dd): ");
+    }
+
+    static void promptEndDateTime()
+    {
+        Console.Write("Enter end date and time (yyyy-MM-dd): ");
+    }
+
+    static void promptPickupOption()
+    {
+        Console.Write("Enter pickup option (pickup/delivery): ");
+    }
+
+    // Enter methods
+    static DateTime enterStartDateTime()
+    {
+        return DateTime.Parse(Console.ReadLine());
+    }
+
+    static DateTime enterEndDateTime()
+    {
+        return DateTime.Parse(Console.ReadLine());
+    }
+
+    static string enterPickupOption()
+    {
+        return Console.ReadLine();
+    }
+
+    private static bool isValidBooking(Car car, DateTime startDate, DateTime endDate, string pickupOption)
+    {
+        var timePeriods = car.GetAvailabilitySchedule().GetTimePeriods();
+        var bookings = car.getBookings();
+
+        // Check if startDateTime and endDateTime are in the future and valid
+        if (startDate <= DateTime.Now || endDate <= DateTime.Now || startDate >= endDate)
+        {
+            Console.WriteLine("Error: Start date must be before end date, and both must be in the future.");
+            return false;
+        }
+
+        // Check if pickupOption is valid
+        if (pickupOption.ToLower() != "pickup" && pickupOption.ToLower() != "delivery")
+        {
+            Console.WriteLine("Error: Pickup option must be either 'pickup' or 'delivery'.");
+            return false;
+        }
+
+        // Check if the booking is within the availability schedule
+        bool isWithinSchedule = timePeriods.Any(period => startDate >= period.StartDate && endDate <= period.EndDate);
+        if (!isWithinSchedule)
+        {
+            Console.WriteLine("Error: Booking period must be within the available time periods.");
+            return false;
+        }
+
+        // Check for overlapping bookings
+        foreach (var booking in bookings)
+        {
+            if (startDate < booking.EndDateTime && endDate > booking.StartDateTime)
+            {
+                Console.WriteLine("Error: The dates overlap with an existing booking.");
+                return false; // Overlaps with existing bookings
+            }
+        }
+
+        return true; // Valid if all checks pass
+    }
+
+    private static double calculateTotalCost(DateTime startDateTime, DateTime endDateTime, double rate)
+    {
+        TimeSpan duration = endDateTime - startDateTime;
+        double totalCost = rate * duration.TotalDays;
+        return totalCost;
+    }
+
+    private static double additionalCost(double totalCost, string pickupOption)
+    {
+        if (pickupOption.ToLower() == "delivery")
+        {
+            totalCost += 50; // Adding $50 for delivery
+        }
+        return totalCost;
+    }
+
+
+    private static Booking createBooking(DateTime startDateTime, DateTime endDateTime, string pickupOption, double totalCost)
+    {
+        return new Booking(1, startDateTime, endDateTime, pickupOption, (int)totalCost, selectedCar, renter);
+    }
+
+    private static void addBooking(Booking booking)
+    {
+        // Add booking to car's bookings list and update availability schedule
+        selectedCar.bookings.Add(booking);
+
+    }
+
+    //Izwan End
 }
 
