@@ -37,7 +37,7 @@ class Program
 
             int option;
             while (!int.TryParse(Console.ReadLine(), out option) || option < 1 || option > 6 ||
-                   (currentUserType == "Renter" && option == 4) ||
+                   //(currentUserType == "Renter" && option == 4) ||
                    (currentUserType == "Car Owner" && option == 3 && currentUserType != "Car Owner"))
             {
                 Console.WriteLine("Invalid option. Please enter a valid number.");
